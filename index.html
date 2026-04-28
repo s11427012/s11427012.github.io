@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>好好吃所 — 精緻料理</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Noto+Serif+TC:wght@300;400;500&family=Josefin+Sans:wght@200;300;400&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#16130e;
+  --parchment:#f5f0e8;
+  --warm-white:#faf8f4;
+  --gold:#b8912a;
+  --gold-light:#d4b05a;
+  --gold-pale:#f0e4c2;
+  --muted:#7a7060;
+  --nav-h:70px;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Noto Serif TC',serif;background:var(--parchment);color:var(--ink);overflow-x:hidden}
+img{display:block;width:100%;object-fit:cover}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--parchment)}
+::-webkit-scrollbar-thumb{background:var(--gold);border-radius:3px}
+
+/* NAVBAR */
+.nav{
+  position:fixed;top:0;left:0;right:0;height:var(--nav-h);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 56px;
+  background:rgba(22,19,14,0.95);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid rgba(184,145,42,0.2);
+  z-index:9999;
+}
+.nav-brand{display:flex;align-items:baseline;gap:10px;cursor:pointer}
+.nav-brand-zh{font-family:'Noto Serif TC',serif;font-size:1.35rem;font-weight:500;color:var(--gold-light);letter-spacing:.06em}
+.nav-brand-en{font-family:'Josefin Sans',sans-serif;font-size:.65rem;font-weight:200;color:rgba(255,255,255,.4);letter-spacing:.28em;text-transform:uppercase}
+.nav-links{display:flex;gap:0;list-style:none}
+.nav-links li a{
+  display:block;padding:0 20px;height:var(--nav-h);line-height:var(--nav-h);
+  font-family:'Josefin Sans',sans-serif;font-size:.72rem;font-weight:300;letter-spacing:.22em;text-transform:uppercase;
+  color:rgba(255,255,255,.6);text-decoration:none;
+  border-bottom:2px solid transparent;
+  transition:color .3s,border-color .3s;cursor:pointer;
+}
+.nav-links li a:hover{color:var(--gold-light)}
+.nav-links li a.active{color:var(--gold-light);border-bottom-color:var(--gold)}
+.hamburger{display:none;flex-direction:column;gap:6px;background:none;border:none;padding:6px;cursor:pointer}
+.hamburger span{display:block;width:24px;height:1.5px;background:var(--gold-light);transition:all .35s}
+.hamburger.open span:nth-child(1){transform:translateY(7.5px) rotate(45deg)}
+.hamburger.open span:nth-child(2){opacity:0;transform:scaleX(0)}
+.hamburger.open span:nth-child(3){transform:translateY(-7.5px) rotate(-45deg)}
+.mobile-drawer{
+  position:fixed;top:var(--nav-h);left:0;right:0;
+  background:rgba(16,13,9,.97);
+  max-height:0;overflow:hidden;
+  transition:max-height .45s cubic-bezier(.4,0,.2,1),padding .45s;
+  z-index:9998;
+}
+.mobile-drawer.open{max-height:400px;padding:16px 0 32px}
+.mobile-drawer a{
+  display:block;padding:16px 40px;
+  font-family:'Josefin Sans',sans-serif;font-size:.8rem;letter-spacing:.25em;text-transform:uppercase;
+  color:rgba(255,255,255,.65);text-decoration:none;cursor:pointer;
+  border-bottom:1px solid rgba(184,145,42,.1);
+  transition:color .3s,padding-left .3s;
+}
+.mobile-drawer a:hover,.mobile-drawer a.active{color:var(--gold-light);padding-left:52px}
+
+/* PAGE WRAP */
+.page-wrap{padding-top:var(--nav-h);min-height:100vh}
+.fade-enter-active,.fade-leave-active{transition:opacity .5s ease,transform .5s ease}
+.fade-enter-from{opacity:0;transform:translateY(14px)}
+.fade-leave-to{opacity:0;transform:translateY(-8px)}
+
+/* SHARED */
+.section{max-width:1160px;margin:0 auto;padding:88px 40px}
+.eyebrow{font-family:'Josefin Sans',sans-serif;font-size:.68rem;letter-spacing:.38em;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+.ttl{font-family:'Cormorant Garamond',serif;font-size:clamp(2.2rem,4.5vw,3.5rem);font-weight:300;line-height:1.15;margin-bottom:20px}
+.ttl em{font-style:italic;color:var(--gold)}
+.divider{width:48px;height:1px;background:linear-gradient(90deg,var(--gold),transparent);margin:20px 0 32px}
+.lead{font-size:.95rem;color:var(--muted);line-height:1.9;max-width:560px;font-family:'Josefin Sans',sans-serif;font-weight:300}
+.btn-gold{
+  display:inline-block;padding:15px 50px;background:var(--gold);color:var(--ink);
+  font-family:'Josefin Sans',sans-serif;font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;
+  border:none;cursor:pointer;text-decoration:none;
+  transition:background .3s,transform .25s,box-shadow .3s;
+}
+.btn-gold:hover{background:var(--gold-light);transform:translateY(-3px);box-shadow:0 8px 30px rgba(184,145,42,.35)}
+.btn-outline{
+  display:inline-block;padding:13px 44px;background:transparent;
+  border:1px solid var(--gold);color:var(--gold);
+  font-family:'Josefin Sans',sans-serif;font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;
+  cursor:pointer;text-decoration:none;transition:background .3s,color .3s;
+}
+.btn-outline:hover{background:var(--gold);color:var(--ink)}
+
+/* HOME HERO */
+.hero{position:relative;height:calc(100vh - var(--nav-h));display:flex;align-items:center;justify-content:center;overflow:hidden}
+.hero-bg{
+  position:absolute;inset:0;
+  background:linear-gradient(160deg,rgba(16,13,9,.72) 0%,rgba(16,13,9,.3) 50%,rgba(16,13,9,.75) 100%),
+    url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1800&q=85') center/cover no-repeat;
+  transform:scale(1.04);animation:heroZoom 18s ease-in-out infinite alternate;
+}
+@keyframes heroZoom{from{transform:scale(1.04)}to{transform:scale(1)}}
+.hero-content{position:relative;text-align:center;color:#fff;padding:0 28px;max-width:740px}
+.h-eyebrow{font-family:'Josefin Sans',sans-serif;font-size:.7rem;letter-spacing:.5em;text-transform:uppercase;color:var(--gold-pale);margin-bottom:24px;opacity:0;animation:riseIn .9s .3s forwards}
+.h-title{font-family:'Cormorant Garamond',serif;font-size:clamp(3.5rem,8vw,7rem);font-weight:300;line-height:1.05;margin-bottom:10px;opacity:0;animation:riseIn .9s .55s forwards}
+.h-title-en{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(1.1rem,2.5vw,1.8rem);font-weight:300;color:var(--gold-light);letter-spacing:.18em;margin-bottom:32px;opacity:0;animation:riseIn .9s .75s forwards}
+.h-sub{font-family:'Josefin Sans',sans-serif;font-weight:200;font-size:1rem;color:rgba(255,255,255,.75);line-height:1.9;margin-bottom:48px;opacity:0;animation:riseIn .9s .95s forwards}
+.h-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;opacity:0;animation:riseIn .9s 1.15s forwards}
+@keyframes riseIn{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+.hero-scroll{position:absolute;bottom:36px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;color:rgba(255,255,255,.45);font-family:'Josefin Sans',sans-serif;font-size:.6rem;letter-spacing:.25em;text-transform:uppercase;animation:bounce 2.5s infinite}
+.hero-scroll::after{content:'';display:block;width:1px;height:40px;background:linear-gradient(var(--gold),transparent)}
+@keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(6px)}}
+
+/* FEATURES */
+.features-row{display:grid;grid-template-columns:repeat(4,1fr);background:var(--ink);border-top:1px solid rgba(184,145,42,.15)}
+.feat{padding:44px 32px;border-right:1px solid rgba(184,145,42,.1);text-align:center;transition:background .3s}
+.feat:last-child{border-right:none}
+.feat:hover{background:rgba(184,145,42,.06)}
+.feat-icon{font-size:1.9rem;margin-bottom:16px}
+.feat h3{font-family:'Cormorant Garamond',serif;font-size:1.15rem;color:var(--gold-light);margin-bottom:10px;font-weight:400}
+.feat p{font-family:'Josefin Sans',sans-serif;font-weight:300;font-size:.82rem;color:rgba(255,255,255,.5);line-height:1.8}
+
+/* ABOUT STRIP */
+.about-strip{display:grid;grid-template-columns:1fr 1fr;min-height:540px}
+.about-img{background:url('https://images.unsplash.com/photo-1559339352-11d035aa65de?w=900&q=80') center/cover;min-height:360px}
+.about-text{background:var(--ink);padding:72px 64px;display:flex;flex-direction:column;justify-content:center;color:#fff}
+.about-text .eyebrow{color:var(--gold-pale)}
+.about-text .ttl{color:#fff}
+.about-text .lead{color:rgba(255,255,255,.6)}
+
+/* MENU */
+.menu-header{height:380px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.menu-header-bg{
+  position:absolute;inset:0;
+  background:linear-gradient(to bottom,rgba(16,13,9,.6),rgba(16,13,9,.75)),
+    url('https://images.unsplash.com/photo-1544025162-d76694265947?w=1400&q=80') center/cover;
+}
+.menu-hc{position:relative;text-align:center;color:#fff}
+.set-banner{
+  background:var(--ink);padding:56px 64px;
+  display:grid;grid-template-columns:1fr auto;align-items:center;gap:32px;
+  border-left:3px solid var(--gold);margin-bottom:64px;position:relative;overflow:hidden;
+}
+.set-banner::before{content:'套';position:absolute;right:-24px;top:-28px;font-family:'Noto Serif TC',serif;font-size:15rem;color:rgba(184,145,42,.05);pointer-events:none;line-height:1}
+.set-banner h3{font-family:'Cormorant Garamond',serif;font-size:1.9rem;color:var(--gold-light);font-weight:300;margin-bottom:12px}
+.set-banner p{font-family:'Josefin Sans',sans-serif;font-weight:300;font-size:.88rem;color:rgba(255,255,255,.65);line-height:1.9;max-width:540px}
+.set-price-box{text-align:center;white-space:nowrap;border:1px solid rgba(184,145,42,.4);padding:24px 32px}
+.set-price-box .price{font-family:'Cormorant Garamond',serif;font-size:2.4rem;color:var(--gold-light);font-weight:400;display:block;margin-bottom:4px}
+.set-price-box small{font-family:'Josefin Sans',sans-serif;font-weight:200;font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.4)}
+.cat-tabs{display:flex;gap:0;flex-wrap:wrap;border-bottom:1px solid rgba(184,145,42,.25);margin-bottom:48px}
+.cat-tab{padding:14px 30px;font-family:'Josefin Sans',sans-serif;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;background:none;border:none;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .3s,border-color .3s;cursor:pointer}
+.cat-tab:hover{color:var(--gold)}
+.cat-tab.active{color:var(--gold);border-bottom-color:var(--gold)}
+.menu-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:28px}
+.menu-card{background:var(--warm-white);border:1px solid rgba(184,145,42,.12);overflow:hidden;transition:transform .35s,box-shadow .35s}
+.menu-card:hover{transform:translateY(-6px);box-shadow:0 20px 50px rgba(0,0,0,.12)}
+.mc-img{height:200px;overflow:hidden}
+.mc-img img{height:100%;transition:transform .6s ease}
+.menu-card:hover .mc-img img{transform:scale(1.07)}
+.mc-body{padding:22px 22px 26px}
+.mc-name{font-family:'Cormorant Garamond',serif;font-size:1.2rem;font-weight:400;margin-bottom:8px}
+.mc-desc{font-family:'Josefin Sans',sans-serif;font-weight:300;font-size:.82rem;color:var(--muted);line-height:1.75;margin-bottom:16px}
+.mc-footer{display:flex;align-items:baseline;justify-content:space-between;border-top:1px solid var(--gold-pale);padding-top:14px}
+.mc-price{font-family:'Cormorant Garamond',serif;font-size:1.35rem;color:var(--gold);font-weight:400}
+.mc-svc{font-family:'Josefin Sans',sans-serif;font-size:.68rem;color:var(--muted);letter-spacing:.1em;text-align:right;line-height:1.5}
+
+/* ABOUT/ROOMS */
+.rooms-hero{height:440px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.rooms-hero-bg{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(16,13,9,.5),rgba(16,13,9,.7)),url('https://images.unsplash.com/photo-1552566626-52f8b828add9?w=1400&q=80') center/cover}
+.rooms-hc{position:relative;text-align:center;color:#fff}
+.rooms-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:2px;background:rgba(184,145,42,.15);margin-bottom:64px}
+.room-card{background:var(--warm-white);overflow:hidden;position:relative}
+.rc-img{height:280px;overflow:hidden}
+.rc-img img{height:100%;transition:transform .7s ease}
+.room-card:hover .rc-img img{transform:scale(1.06)}
+.rc-body{padding:28px 28px 32px}
+.rc-num{font-family:'Cormorant Garamond',serif;font-size:3rem;color:var(--gold-pale);font-weight:300;line-height:1;position:absolute;top:8px;right:16px;pointer-events:none}
+.rc-body h3{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:400;margin-bottom:12px}
+.rc-body p{font-family:'Josefin Sans',sans-serif;font-weight:300;font-size:.85rem;color:var(--muted);line-height:1.8}
+.rc-tag{display:inline-block;margin-top:16px;padding:6px 16px;border:1px solid rgba(184,145,42,.4);font-family:'Josefin Sans',sans-serif;font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+.tea-section{background:var(--ink);padding:72px 64px;display:grid;grid-template-columns:1fr 1fr;gap:72px;align-items:start}
+.tea-section .eyebrow{color:var(--gold-pale)}
+.tea-section .ttl{color:#fff}
+.tea-section .lead{color:rgba(255,255,255,.55)}
+.tea-list{margin-top:32px}
+.tea-item{display:flex;align-items:center;gap:16px;padding:16px 0;border-bottom:1px solid rgba(184,145,42,.12);color:rgba(255,255,255,.75);font-family:'Josefin Sans',sans-serif;font-weight:300;font-size:.9rem}
+.tea-item:last-child{border-bottom:none}
+.tea-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);flex-shrink:0}
+.tea-price{margin-left:auto;color:var(--gold);font-size:.85rem;white-space:nowrap;text-align:right}
+
+/* EVENTS */
+.events-hero{height:400px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.events-hero-bg{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(16,13,9,.55),rgba(16,13,9,.72)),url('https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=1400&q=80') center/cover}
+.events-hc{position:relative;text-align:center;color:#fff}
+.events-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:24px;margin-bottom:80px}
+.ev-card{border:1px solid rgba(184,145,42,.2);padding:40px 32px;background:var(--warm-white);text-align:center;transition:border-color .3s,transform .3s,box-shadow .3s}
+.ev-card:hover{border-color:var(--gold);transform:translateY(-5px);box-shadow:0 16px 40px rgba(0,0,0,.09)}
+.ev-icon{font-size:2.4rem;margin-bottom:20px}
+.ev-card h3{font-family:'Cormorant Garamond',serif;font-size:1.25rem;font-weight:400;margin-bottom:12px}
+.ev-card p{font-family:'Josefin Sans',sans-serif;font-weight:300;font-size:.84rem;color:var(--muted);line-height:1.8}
+.ev-cta{text-align:center;padding:72px 40px;background:var(--ink);position:relative;overflow:hidden}
+.ev-cta::before{content:'';position:absolute;inset:0;background:url('https://images.unsplash.com/photo-1559329007-40df8a9345d8?w=1200&q=60') center/cover;opacity:.08}
+.ev-cta-c{position:relative}
+.ev-cta h2{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,4vw,3rem);font-weight:300;color:#fff;margin-bottom:16px}
+.ev-cta p{font-family:'Josefin Sans',sans-serif;font-weight:300;font-size:.9rem;color:rgba(255,255,255,.6);margin-bottom:36px;line-height:1.8}
+
+/* CONTACT */
+.contact-layout{display:grid;grid-template-columns:400px 1fr;gap:80px;align-items:start}
+.info-block{margin-bottom:36px}
+.info-block h4{font-family:'Josefin Sans',sans-serif;font-size:.68rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+.info-block p{font-family:'Josefin Sans',sans-serif;font-weight:300;font-size:.92rem;line-height:1.85;color:var(--ink)}
+.info-block a{color:var(--gold);text-decoration:none;transition:opacity .2s}
+.info-block a:hover{opacity:.7}
+.map-box{height:220px;background:url('https://images.unsplash.com/photo-1524661135-423995f22d0b?w=800&q=70') center/cover;position:relative;margin-bottom:40px;overflow:hidden}
+.map-box::after{content:'📍 臺南市東區長榮路一段 188 號';position:absolute;bottom:0;left:0;right:0;padding:10px 16px;background:rgba(16,13,9,.72);font-family:'Josefin Sans',sans-serif;font-weight:300;font-size:.78rem;color:rgba(255,255,255,.8)}
+.contact-form{display:flex;flex-direction:column;gap:20px}
+.form-title{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;margin-bottom:8px}
+.form-sub{font-family:'Josefin Sans',sans-serif;font-weight:300;font-size:.85rem;color:var(--muted);margin-bottom:12px;line-height:1.7}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.form-group{display:flex;flex-direction:column;gap:7px}
+.form-group label{font-family:'Josefin Sans',sans-serif;font-size:.68rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted)}
+.form-group input,.form-group select,.form-group textarea{padding:13px 16px;border:1px solid rgba(184,145,42,.25);background:var(--warm-white);font-family:'Josefin Sans',sans-serif;font-weight:300;font-size:.9rem;color:var(--ink);outline:none;border-radius:0;transition:border-color .3s,background .3s;appearance:none}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--gold);background:#fff}
+.form-group textarea{resize:vertical;min-height:130px}
+.form-note{font-family:'Josefin Sans',sans-serif;font-size:.72rem;font-weight:300;color:var(--muted);line-height:1.6}
+.form-success{padding:28px 32px;background:rgba(184,145,42,.08);border-left:3px solid var(--gold)}
+.form-success h3{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:400;color:var(--gold);margin-bottom:8px}
+.form-success p{font-family:'Josefin Sans',sans-serif;font-weight:300;font-size:.88rem;color:var(--muted);line-height:1.7}
+
+/* FOOTER */
+footer{background:var(--ink);padding:64px 56px 36px}
+.footer-inner{max-width:1160px;margin:0 auto;display:grid;grid-template-columns:1fr auto 1fr;gap:40px;align-items:start;border-bottom:1px solid rgba(184,145,42,.15);padding-bottom:48px;margin-bottom:36px}
+.f-logo{font-family:'Noto Serif TC',serif;font-size:1.5rem;color:var(--gold-light);font-weight:500;margin-bottom:10px}
+.f-brand p{font-family:'Josefin Sans',sans-serif;font-weight:200;font-size:.78rem;color:rgba(255,255,255,.4);letter-spacing:.15em;line-height:1.8}
+.f-nav{display:flex;flex-direction:column;gap:12px;align-items:center}
+.f-nav a{font-family:'Josefin Sans',sans-serif;font-weight:300;font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.5);text-decoration:none;cursor:pointer;transition:color .3s}
+.f-nav a:hover{color:var(--gold-light)}
+.f-contact{text-align:right}
+.f-contact p{font-family:'Josefin Sans',sans-serif;font-weight:300;font-size:.82rem;color:rgba(255,255,255,.45);line-height:2}
+.footer-copy{text-align:center;font-family:'Josefin Sans',sans-serif;font-weight:200;font-size:.7rem;letter-spacing:.18em;color:rgba(255,255,255,.25)}
+
+/* RWD */
+@media(max-width:1024px){
+  .nav{padding:0 28px}
+  .nav-links{display:none}
+  .hamburger{display:flex}
+  .features-row{grid-template-columns:repeat(2,1fr)}
+  .feat:nth-child(2){border-right:none}
+  .feat:nth-child(3){border-bottom:none}
+  .about-strip{grid-template-columns:1fr}
+  .about-img{min-height:300px}
+  .about-text{padding:56px 40px}
+  .tea-section{grid-template-columns:1fr;gap:40px;padding:56px 40px}
+  .set-banner{grid-template-columns:1fr;padding:40px 32px}
+  .contact-layout{grid-template-columns:1fr;gap:56px}
+  .footer-inner{grid-template-columns:1fr 1fr}
+  .f-contact{grid-column:span 2;text-align:left}
+}
+@media(max-width:680px){
+  .nav{padding:0 20px}
+  .section{padding:64px 20px}
+  .features-row{grid-template-columns:1fr}
+  .feat{border-right:none !important;border-bottom:1px solid rgba(184,145,42,.1)}
+  .feat:last-child{border-bottom:none}
+  .form-row{grid-template-columns:1fr}
+  .footer-inner{grid-template-columns:1fr}
+  .f-contact{grid-column:auto;text-align:left}
+  .h-btns{flex-direction:column;align-items:center}
+  .set-banner{padding:32px 24px}
+  footer{padding:48px 24px 28px}
+  .tea-section{padding:48px 24px}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<nav class="nav">
+  <div class="nav-brand" @click="go('home')">
+    <span class="nav-brand-zh">好好吃所</span>
+    <span class="nav-brand-en">Fine Dining</span>
+  </div>
+  <ul class="nav-links">
+    <li v-for="p in pages" :key="p.k">
+      <a :class="{active:cur===p.k}" @click="go(p.k)">{{p.n}}</a>
+    </li>
+  </ul>
+  <button class="hamburger" :class="{open:drawer}" @click="drawer=!drawer">
+    <span/><span/><span/>
+  </button>
+</nav>
+
+<div class="mobile-drawer" :class="{open:drawer}">
+  <a v-for="p in pages" :key="p.k" :class="{active:cur===p.k}" @click="go(p.k)">{{p.n}}</a>
+</div>
+
+<div class="page-wrap">
+  <transition name="fade" mode="out-in">
+
+    <!-- HOME -->
+    <div v-if="cur==='home'" key="home">
+      <section class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-content">
+          <p class="h-eyebrow">Taiwan · Tainan · 臺南精緻料理</p>
+          <h1 class="h-title">好好吃所</h1>
+          <p class="h-title-en">Hào Hào Chī Suǒ</p>
+          <p class="h-sub">以食材訴說土地的故事，以火候詮釋主廚的心意<br>每一口，都是一次細膩而難忘的感官旅程</p>
+          <div class="h-btns">
+            <button class="btn-gold" @click="go('contact')">立即訂位</button>
+            <button class="btn-outline" @click="go('menu')" style="color:#fff;border-color:rgba(255,255,255,.5)">瀏覽菜單</button>
+          </div>
+        </div>
+        <div class="hero-scroll">SCROLL</div>
+      </section>
+
+      <div class="features-row">
+        <div class="feat" v-for="f in feats" :key="f.t">
+          <div class="feat-icon">{{f.i}}</div>
+          <h3>{{f.t}}</h3><p>{{f.d}}</p>
+        </div>
+      </div>
+
+      <div class="about-strip">
+        <div class="about-img"></div>
+        <div class="about-text">
+          <p class="eyebrow">Our Story</p>
+          <h2 class="ttl">料理，是一種<em>語言</em></h2>
+          <div class="divider"></div>
+          <p class="lead">好好吃所坐落於台南老城區，由旅法主廚黃彥翔於 2019 年創立。他相信每一道菜都是一封寫給食客的信，訴說著食材的來歷、土地的性格，以及廚師最深的情感。</p>
+          <br>
+          <p class="lead">我們與超過 30 位在地小農直接合作，確保每一項食材在最完美的狀態下進入廚房。</p>
+          <br>
+          <button class="btn-outline" @click="go('about')">探索餐廳</button>
+        </div>
+      </div>
+
+      <footer>
+        <div class="footer-inner">
+          <div class="f-brand"><div class="f-logo">好好吃所</div><p>臺南市東區長榮路一段 188 號<br>週二至週日　11:30 – 21:30</p></div>
+          <nav class="f-nav"><a v-for="p in pages" :key="p.k" @click="go(p.k)">{{p.n}}</a></nav>
+          <div class="f-contact"><p>📞 06-123-4567<br>✉️ hello@haohaochisuo.tw<br>IG @haohaochisuo</p></div>
+        </div>
+        <p class="footer-copy">© 2025 好好吃所 Fine Dining · All rights reserved</p>
+      </footer>
+    </div>
+
+    <!-- MENU -->
+    <div v-else-if="cur==='menu'" key="menu">
+      <div class="menu-header">
+        <div class="menu-header-bg"></div>
+        <div class="menu-hc">
+          <p class="eyebrow" style="color:var(--gold-pale)">Cuisine</p>
+          <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,6vw,4.5rem);font-weight:300;color:#fff">精緻菜單</h2>
+        </div>
+      </div>
+      <div class="section">
+        <div class="set-banner">
+          <div>
+            <p class="eyebrow" style="color:var(--gold-pale)">Set Menu</p>
+            <h3>個人五道式套餐</h3>
+            <p>開胃小點 → 湯品 → 沙拉 → 主餐 → 甜點，由主廚精心設計，提供最完整的味蕾饗宴。</p>
+          </div>
+          <div class="set-price-box">
+            <span class="price">NT$ 1,980</span>
+            <small>＋10% 服務費<br>總計 NT$ 2,178 / 人</small>
+          </div>
+        </div>
+
+        <p class="eyebrow">À La Carte</p>
+        <h2 class="ttl">單點菜單</h2>
+        <div class="divider"></div>
+
+        <div class="cat-tabs">
+          <button v-for="c in cats" :key="c.k" class="cat-tab" :class="{active:acat===c.k}" @click="acat=c.k">{{c.n}}</button>
+        </div>
+
+        <transition name="fade" mode="out-in">
+          <div class="menu-grid" :key="acat">
+            <div class="menu-card" v-for="item in menuData[acat]" :key="item.name">
+              <div class="mc-img"><img :src="item.img" :alt="item.name" loading="lazy"/></div>
+              <div class="mc-body">
+                <h3 class="mc-name">{{item.name}}</h3>
+                <p class="mc-desc">{{item.desc}}</p>
+                <div class="mc-footer">
+                  <span class="mc-price">NT$ {{item.price}}</span>
+                  <span class="mc-svc">＋10% 服務費<br>總計 NT$ {{Math.round(item.price*1.1)}}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </transition>
+      </div>
+
+      <footer>
+        <div class="footer-inner">
+          <div class="f-brand"><div class="f-logo">好好吃所</div><p>臺南市東區長榮路一段 188 號<br>週二至週日　11:30 – 21:30</p></div>
+          <nav class="f-nav"><a v-for="p in pages" :key="p.k" @click="go(p.k)">{{p.n}}</a></nav>
+          <div class="f-contact"><p>📞 06-123-4567<br>✉️ hello@haohaochisuo.tw</p></div>
+        </div>
+        <p class="footer-copy">© 2025 好好吃所 Fine Dining · All rights reserved</p>
+      </footer>
+    </div>
+
+    <!-- ABOUT -->
+    <div v-else-if="cur==='about'" key="about">
+      <div class="rooms-hero">
+        <div class="rooms-hero-bg"></div>
+        <div class="rooms-hc">
+          <p class="eyebrow" style="color:var(--gold-pale)">Our Space</p>
+          <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,6vw,4.5rem);font-weight:300;color:#fff">餐廳空間 與 茶水服務</h2>
+        </div>
+      </div>
+      <div class="section">
+        <p class="eyebrow">Ambience</p>
+        <h2 class="ttl">每個角落，<em>皆是故事</em></h2>
+        <div class="divider"></div>
+        <p class="lead" style="margin-bottom:56px">好好吃所以百年老屋為骨架，融入法式沙龍與日式侘寂美學，打造出獨一無二的用餐場域。</p>
+        <div class="rooms-grid">
+          <div class="room-card" v-for="(r,i) in rooms" :key="r.title">
+            <div class="rc-img"><img :src="r.img" :alt="r.title" loading="lazy"/></div>
+            <div class="rc-body">
+              <span class="rc-num">0{{i+1}}</span>
+              <h3>{{r.title}}</h3>
+              <p>{{r.desc}}</p>
+              <span class="rc-tag">{{r.tag}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tea-section">
+        <div>
+          <p class="eyebrow">Welcome Drink</p>
+          <h2 class="ttl">茶水<em>服務</em></h2>
+          <div class="divider"></div>
+          <p class="lead">入座後提供迎賓茶一杯（免費）。以下飲品可加購，標示含 10% 服務費後總價。</p>
+        </div>
+        <div class="tea-list">
+          <div class="tea-item" v-for="t in teas" :key="t.n">
+            <span class="tea-dot"></span>
+            <span>{{t.n}}</span>
+            <span class="tea-price">
+              <template v-if="t.p===0">迎賓免費</template>
+              <template v-else>NT$ {{Math.round(t.p*1.1)}} <small style="font-size:.65rem;color:var(--muted)">含服務費</small></template>
+            </span>
+          </div>
+        </div>
+      </div>
+      <footer>
+        <div class="footer-inner">
+          <div class="f-brand"><div class="f-logo">好好吃所</div><p>臺南市東區長榮路一段 188 號<br>週二至週日　11:30 – 21:30</p></div>
+          <nav class="f-nav"><a v-for="p in pages" :key="p.k" @click="go(p.k)">{{p.n}}</a></nav>
+          <div class="f-contact"><p>📞 06-123-4567<br>✉️ hello@haohaochisuo.tw</p></div>
+        </div>
+        <p class="footer-copy">© 2025 好好吃所 Fine Dining · All rights reserved</p>
+      </footer>
+    </div>
+
+    <!-- EVENTS -->
+    <div v-else-if="cur==='events'" key="events">
+      <div class="events-hero">
+        <div class="events-hero-bg"></div>
+        <div class="events-hc">
+          <p class="eyebrow" style="color:var(--gold-pale)">Private & Events</p>
+          <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,6vw,4.5rem);font-weight:300;color:#fff">活動 與 包場</h2>
+        </div>
+      </div>
+      <div class="section">
+        <p class="eyebrow">Occasions</p>
+        <h2 class="ttl">專屬您的<em>特別時刻</em></h2>
+        <div class="divider"></div>
+        <p class="lead" style="margin-bottom:56px">無論是求婚、壽宴、企業宴客或品牌發表，好好吃所提供全方位的客製化包場服務。</p>
+        <div class="events-grid">
+          <div class="ev-card" v-for="e in events" :key="e.t">
+            <div class="ev-icon">{{e.i}}</div>
+            <h3>{{e.t}}</h3><p>{{e.d}}</p>
+          </div>
+        </div>
+      </div>
+      <div class="ev-cta">
+        <div class="ev-cta-c">
+          <h2>讓我們規劃您的完美活動</h2>
+          <p>請填寫洽詢表單，我們的活動專員將於 24 小時內與您聯繫</p>
+          <button class="btn-gold" @click="go('contact')">立即洽詢</button>
+        </div>
+      </div>
+      <footer>
+        <div class="footer-inner">
+          <div class="f-brand"><div class="f-logo">好好吃所</div><p>臺南市東區長榮路一段 188 號<br>週二至週日　11:30 – 21:30</p></div>
+          <nav class="f-nav"><a v-for="p in pages" :key="p.k" @click="go(p.k)">{{p.n}}</a></nav>
+          <div class="f-contact"><p>📞 06-123-4567<br>✉️ hello@haohaochisuo.tw</p></div>
+        </div>
+        <p class="footer-copy">© 2025 好好吃所 Fine Dining · All rights reserved</p>
+      </footer>
+    </div>
+
+    <!-- CONTACT -->
+    <div v-else-if="cur==='contact'" key="contact">
+      <div class="section">
+        <p class="eyebrow">Contact & Reservation</p>
+        <h2 class="ttl">聯絡我們 / <em>訂位</em></h2>
+        <div class="divider"></div>
+        <div class="contact-layout">
+          <div>
+            <div class="map-box"></div>
+            <div class="info-block"><h4>地址</h4><p>臺南市東區長榮路一段 188 號<br>（靠近台南火車站，步行約 10 分鐘）</p></div>
+            <div class="info-block"><h4>電話</h4><p><a href="tel:061234567">06-123-4567</a></p></div>
+            <div class="info-block"><h4>Email</h4><p><a href="mailto:hello@haohaochisuo.tw">hello@haohaochisuo.tw</a></p></div>
+            <div class="info-block"><h4>營業時間</h4><p>週二 — 週五　11:30 – 14:30 / 17:30 – 21:30<br>週六 — 週日　11:30 – 21:30（全日）<br>週一公休</p></div>
+            <div class="info-block"><h4>停車資訊</h4><p>附近設有長榮路立體停車場（步行約 3 分鐘），提供停車補貼券。</p></div>
+          </div>
+          <div>
+            <div v-if="sent" class="form-success">
+              <h3>✓ 感謝您的訊息！</h3>
+              <p>我們已收到您的訂位洽詢，專人將於 24 小時內以 Email 或電話回覆確認。期待在好好吃所與您相見 🌿</p>
+            </div>
+            <form v-else class="contact-form" @submit.prevent="send">
+              <h2 class="form-title">訂位 / 洽詢表單</h2>
+              <p class="form-sub">請填寫以下資訊，我們將盡快與您確認席位。<br>如需緊急訂位，歡迎直接致電 06-123-4567。</p>
+              <div class="form-row">
+                <div class="form-group"><label>姓名 *</label><input type="text" v-model="f.name" placeholder="王小明" required/></div>
+                <div class="form-group"><label>聯絡電話 *</label><input type="tel" v-model="f.tel" placeholder="0912-345-678" required/></div>
+              </div>
+              <div class="form-group"><label>Email</label><input type="email" v-model="f.email" placeholder="example@mail.com"/></div>
+              <div class="form-row">
+                <div class="form-group"><label>希望日期 *</label><input type="date" v-model="f.date" required/></div>
+                <div class="form-group">
+                  <label>希望時段 *</label>
+                  <select v-model="f.time" required>
+                    <option value="">請選擇</option>
+                    <option>午餐 11:30</option><option>午餐 12:00</option><option>午餐 12:30</option>
+                    <option>晚餐 17:30</option><option>晚餐 18:00</option><option>晚餐 18:30</option><option>晚餐 19:00</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label>用餐人數 *</label>
+                  <select v-model="f.guests" required>
+                    <option value="">請選擇</option>
+                    <option v-for="n in 12" :key="n" :value="n">{{n}} 位</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>用餐類型</label>
+                  <select v-model="f.type">
+                    <option value="">請選擇</option>
+                    <option>一般用餐</option><option>生日慶祝</option><option>求婚布置</option>
+                    <option>商務宴客</option><option>包場活動</option><option>其他</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group"><label>特殊需求 / 留言</label><textarea v-model="f.note" placeholder="過敏食材、場地布置需求、其他特殊要求…"></textarea></div>
+              <p class="form-note">＊ 訂位確認後，系統將發送確認信至您填寫的 Email。<br>＊ 如需取消或更改訂位，請於用餐日 48 小時前告知。</p>
+              <button type="submit" class="btn-gold">送出洽詢</button>
+            </form>
+          </div>
+        </div>
+      </div>
+      <footer>
+        <div class="footer-inner">
+          <div class="f-brand"><div class="f-logo">好好吃所</div><p>臺南市東區長榮路一段 188 號<br>週二至週日　11:30 – 21:30</p></div>
+          <nav class="f-nav"><a v-for="p in pages" :key="p.k" @click="go(p.k)">{{p.n}}</a></nav>
+          <div class="f-contact"><p>📞 06-123-4567<br>✉️ hello@haohaochisuo.tw</p></div>
+        </div>
+        <p class="footer-copy">© 2025 好好吃所 Fine Dining · All rights reserved</p>
+      </footer>
+    </div>
+
+  </transition>
+</div>
+</div>
+
+<script>
+const {createApp,ref}=Vue;
+createApp({
+  setup(){
+    const cur=ref('home');
+    const drawer=ref(false);
+    const acat=ref('appetizer');
+    const sent=ref(false);
+    const f=ref({name:'',tel:'',email:'',date:'',time:'',guests:'',type:'',note:''});
+
+    const pages=[{k:'home',n:'首頁'},{k:'menu',n:'菜單'},{k:'about',n:'餐廳介紹'},{k:'events',n:'活動包場'},{k:'contact',n:'聯絡訂位'}];
+    const feats=[
+      {i:'🌿',t:'在地小農',d:'與 30 位台南在地農友直接合作，確保食材新鮮、履歷透明。'},
+      {i:'👨‍🍳',t:'主廚手藝',d:'旅法主廚黃彥翔融合法式技法與台灣風土，詮釋獨特料理語言。'},
+      {i:'🍷',t:'精選酒單',d:'侍酒師嚴選國內外葡萄酒，提供最完美的佐餐搭配建議。'},
+      {i:'🕯️',t:'私密空間',d:'三種風格迥異的用餐空間，從浪漫雙人到大型包場皆能滿足。'},
+    ];
+    const cats=[{k:'appetizer',n:'開胃小點'},{k:'salad',n:'沙拉'},{k:'main',n:'主餐'},{k:'dessert',n:'甜點'},{k:'drink',n:'飲料'}];
+    const menuData={
+      appetizer:[
+        {name:'鴨肝慕斯脆片',desc:'頂級法式鴨肝搭配自製香草奶油，佐以黑松露薄片，口感綿密細緻，開啟味蕾序章。',price:380,img:'https://images.unsplash.com/photo-1625944230945-1b7dd3b949ab?w=600&q=75'},
+        {name:'煙燻鮭魚塔',desc:'挪威煙燻鮭魚、酸豆、刁草慕斯，堆疊成精緻小塔，清爽而層次豐富。',price:320,img:'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=600&q=75'},
+        {name:'和牛牛肉韃靼',desc:'日本 A5 和牛手切，佐以蛋黃醬、第戎芥末子與脆蔥，鮮嫩芬芳。',price:480,img:'https://images.unsplash.com/photo-1546964124-0cce460f38ef?w=600&q=75'},
+        {name:'南瓜奶油濃湯',desc:'台南當季金瓜以法式手法熬製，加入鮮奶油提升濃郁度，附蒜香麵包片。',price:220,img:'https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a?w=600&q=75'},
+      ],
+      salad:[
+        {name:'尼斯風情沙拉',desc:'黃鰭鮪魚、四季豆、鵪鶉蛋與橄欖，以普羅旺斯油醋汁輕拌，色彩繽紛。',price:280,img:'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=600&q=75'},
+        {name:'蘋果核桃沙拉',desc:'青蘋果薄片、炭烤核桃、法國藍紋乳酪，配蜂蜜芥末醬，甜鹹平衡絕妙。',price:260,img:'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=600&q=75'},
+        {name:'嫩葉凱薩沙拉',desc:'羅馬萵苣、帕瑪森薄片、自製麵包脆丁，淋上經典凱薩醬，清新爽脆。',price:240,img:'https://images.unsplash.com/photo-1546793665-c74683f339c1?w=600&q=75'},
+      ],
+      main:[
+        {name:'龍蝦奶油義大利麵',desc:'波士頓龍蝦以蕃茄奶油醬汁烹調，搭配自製新鮮義大利麵，海味濃郁鮮甜。',price:980,img:'https://images.unsplash.com/photo-1563379926898-05f4575a45d8?w=600&q=75'},
+        {name:'乾式熟成肋眼牛排',desc:'45 天乾式熟成美國 Prime 肋眼，配松露馬鈴薯泥與季節蔬菜，火候精準到位。',price:1680,img:'https://images.unsplash.com/photo-1544025162-d76694265947?w=600&q=75'},
+        {name:'油封鴨腿佐柳橙醬',desc:'法式慢煮油封鴨腿，皮脆肉嫩，搭配甜橙醬汁與焦糖洋蔥，風味絕佳。',price:780,img:'https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=600&q=75'},
+        {name:'香煎比目魚佐奶油',desc:'挪威比目魚，煎至金黃酥脆，淋上檸檬香草奶油醬，清雅鮮嫩入味。',price:860,img:'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2?w=600&q=75'},
+        {name:'綜合野菇燉飯（蔬食）',desc:'四種野菇、帕瑪森、白松露油，以阿柏里歐米燉製，濃郁鮮香，蔬食者首選。',price:560,img:'https://images.unsplash.com/photo-1476124369491-e7addf5db371?w=600&q=75'},
+      ],
+      dessert:[
+        {name:'熔岩巧克力蛋糕',desc:'70% 比利時黑巧克力，外層微脆、內裡流心，搭配香草冰淇淋，甜蜜滿分。',price:260,img:'https://images.unsplash.com/photo-1624353365286-3f8d62daad51?w=600&q=75'},
+        {name:'法式焦糖布丁',desc:'傳統法式配方，表層焦糖薄脆，內層絲滑如嫩，點燃舌尖最深的甜蜜記憶。',price:220,img:'https://images.unsplash.com/photo-1470124182917-cc6e71b22ecc?w=600&q=75'},
+        {name:'季節水果千層',desc:'以當季新鮮水果與卡士達奶油交疊成千層，口感豐富、層次分明，視覺絕美。',price:280,img:'https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=600&q=75'},
+        {name:'伯爵茶冰淇淋',desc:'以台灣高山茶葉萃取融入法式冰淇淋基底，茶香清雅，甜度恰好不膩口。',price:180,img:'https://images.unsplash.com/photo-1501443762994-82bd5dace89a?w=600&q=75'},
+      ],
+      drink:[
+        {name:'高山烏龍茶',desc:'梨山嚴選高冷烏龍，香氣清雅、回甘持久，熱/冷兩種供應，免費迎賓一杯。',price:180,img:'https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=600&q=75'},
+        {name:'手沖單品咖啡',desc:'每日更換豆單，以 V60 手沖展現咖啡豆最純粹的風土氣息，附糖與鮮奶。',price:200,img:'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=600&q=75'},
+        {name:'義式特調氣泡飲',desc:'以時令水果製成的氣泡調飲，清爽解膩，每日限量供應，色彩鮮豔誘人。',price:220,img:'https://images.unsplash.com/photo-1544145945-f90425340c7e?w=600&q=75'},
+        {name:'侍酒師推薦葡萄酒（杯）',desc:'由侍酒師依菜肴搭配推薦當日酒款，紅/白/氣泡三種選擇，完美佐餐。',price:380,img:'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=600&q=75'},
+      ],
+    };
+    const rooms=[
+      {title:'主廳 — The Grand Hall',desc:'容納 40 位賓客的開放式主廳，挑高天花板搭配訂製暖金色吊燈，適合多人聚餐或商務宴客，充滿儀式感。',tag:'最多 40 人',img:'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=700&q=80'},
+      {title:'私人包廂 — Salon Privé',desc:'獨立隔間的私密用餐空間，可容納 6–12 位賓客，備有專屬服務人員，適合求婚、商務機密會談或家族聚會。',tag:'6 – 12 人',img:'https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?w=700&q=80'},
+      {title:'戶外庭院 — Garden Terrace',desc:'綠意盎然的半戶外庭院，天氣晴朗時可仰望星空，搭配燭光與植栽，是浪漫約會或小型酒會的完美場地。',tag:'2 – 20 人',img:'https://images.unsplash.com/photo-1559339352-11d035aa65de?w=700&q=80'},
+    ];
+    const teas=[
+      {n:'梨山高冷烏龍茶（迎賓）',p:0},
+      {n:'日月潭紅玉紅茶',p:180},
+      {n:'東方美人茶',p:200},
+      {n:'手沖衣索比亞耶加雪菲',p:200},
+      {n:'法國氣泡礦泉水 Perrier（500ml）',p:150},
+      {n:'台灣天然礦泉水',p:80},
+    ];
+    const events=[
+      {i:'💍',t:'求婚包場',d:'我們協助您佈置最浪漫的場景，安排專屬菜單與香檳塔，讓這一刻永生難忘。'},
+      {i:'🎂',t:'生日慶祝',d:'客製化蛋糕、座位花卉裝飾與生日歌演奏，讓壽星感受到最尊貴的待遇。'},
+      {i:'🏢',t:'企業宴客',d:'精緻的商務用餐環境，全程由專屬服務人員打理，讓您從容應對重要場合。'},
+      {i:'🥂',t:'週年與紀念日',d:'無論個人、品牌週年，我們量身打造專屬慶典菜單與空間氛圍。'},
+    ];
+
+    function go(page){cur.value=page;drawer.value=false;window.scrollTo({top:0,behavior:'smooth'})}
+    function send(){sent.value=true}
+
+    return{cur,drawer,acat,sent,f,pages,feats,cats,menuData,rooms,teas,events,go,send};
+  }
+}).mount('#app');
+</script>
+</body>
+</html>
